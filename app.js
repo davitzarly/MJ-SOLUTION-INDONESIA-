@@ -269,9 +269,10 @@ function verifyJWT(token) {
 }
 
 function handleLogin() {
+    localStorage.clear(); // Hapus semua cache lama
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value;
-    const errEl = document.getElementById('loginError');
+    // ... seterusnya
 
     if (user === 'admin' && pass === 'davit2009') {
         const token = simpleJWT({ username: user, role: 'admin' });
