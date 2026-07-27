@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignageOS — Control Panel</title>
+
+    <!-- External Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Atmospheric Background -->
+    <div class="bg-atmosphere"></div>
+
+    <!-- ======================== TOAST CONTAINER ======================== -->
+    <div id="toastContainer"></div>
+
+    <!-- ======================== LOGIN PAGE ======================== -->
+    <div id="loginPage">
+        <div class="login-card">
+            <div class="logo-icon"><i class="fas fa-tv"></i></div>
+            <h2 class="login-title">SignageOS</h2>
+            <p class="login-subtitle">Signage Control Panel</p>
+
+            <div class="input-group">
+                <label for="loginUser">Username</label>
+                <input type="text" id="loginUser" placeholder="Masukkan username" value="admin" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label for="loginPass">Password</label>
+                <input type="password" id="loginPass" placeholder="Masukkan password" value="davit2009">
+            </div>
+            <div id="loginError" class="login-error"></div>
+            <button class="btn btn-primary btn-block" id="loginBtn" style="margin-top:8px;">
+                <i class="fas fa-sign-in-alt"></i> Masuk
+            </button>
+            <p class="login-hint">Default: admin / davit2009</p>
+        </div>
+    </div>
+
+    <!-- ======================== APP LAYOUT ======================== -->
+    <div id="appLayout" style="display:none;">
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- ========== SIDEBAR ========== -->
+        <aside id="sidebar">
+            <div class="sidebar-logo">
+                <div class="icon"><i class="fas fa-tv"></i></div>
+                <div>
+                    <h1>SignageOS</h1>
+                    <span>Control Panel v1.0</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Utama</div>
+                <button class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </button>
+                <button class="nav-item" data-page="devices">
+                    <i class="fas fa-desktop"></i> Devices
+                    <span class="nav-badge" id="deviceCountBadge">0</span>
+                </button>
+                <button class="nav-item" data-page="contents">
+                    <i class="fas fa-photo-video"></i> Konten
+                </button>
+
+                <div class="nav-section-label">Real-time</div>
+                <button class="nav-item" data-page="clients">
+                    <i class="fas fa-mobile-alt"></i> Device Client
+                </button>
+                <button class="nav-item" data-page="logs">
+                    <i class="fas fa-list-alt"></i> Activity Log
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="avatar">A</div>
+                <div class="info">
+                    <div class="name">Admin</div>
+                    <div class="role">Administrator</div>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Keluar">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ========== MAIN CONTENT ========== -->
+        <div id="mainContent">
+
+            <!-- ===== DASHBOARD PAGE ===== -->
+            <section id="page-dashboard" class="page-section active">
+                <div class="page-header">
+                    <div>
+                        <h2>Dashboard</h2>
+                        <p>Ringkasan status seluruh device dan konten signage</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" id="refreshDashBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div class="page-body">
+                    <div class="stat-grid" id="statGrid"></div>
+                    <div class="dashboard-grid" id="dashboardGrid">
+                        <div class="table-wrapper">
+                            <div class="table-toolbar">
+                                <h3 style="font-size:15px; font-weight:600;">Device Terbaru</h3>
+                            </div>
+                            <div style="overflow-x:auto;">
+                                <table>
+                                    <thead><tr>
+                                        <th>Nama</th><th>Lokasi</th><th>Status</th><th>Terakhir Dilihat</th>
+                                    </tr></thead>
+                                    <tbody id="dashDeviceTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="log-panel">
+                            <div class="log-header">
+                                <h3>Aktivitas Terbaru</h3>
+                            </div>
+                            <div class="log-entries" id="dashLogEntries"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== DEVICES PAGE ===== -->
+            <section id="page-devices" class="page-section">
+                <div class="page-header">
+                    <div>
+                        <h2>Manajemen Device</h2>
+                        <p>Kelola semua perangkat signage yang terdaftar</p>
+                    </div>
+                    <button class="btn btn-primary" id="addDeviceBtn">
+                        <i class="fas fa-plus"></i> Tambah Device
+                    </button>
+                </div>
+                <div class="page-body">
+                    <div class="table-wrapper">
+                        <div class="table-toolbar">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Cari device..." id="deviceSearch">
+                            </div>
+                            <button class="btn btn-sm btn-secondary" id="playlistBtn">
+                                <i class="fas fa-list-ol"></i> Playlist
+                            </button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table>
+                                <thead><tr>
+                                    <th>Nama</th><th>Lokasi</th><th>Status</th>
+                                    <th>Konten Aktif</th><th>Terakhir Dilihat</th><th>Aksi</th>
+                                </tr></thead>
+                                <tbody id="deviceTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="deviceEmptyState" class="empty-state" style="display:none;">
+                            <i class="fas fa-desktop"></i>
+                            <p>Belum ada device terdaftar</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CONTENTS PAGE ===== -->
+            <section id="page-contents" class="page-section">
+                <div class="page-header">
+                    <div>
+                        <h2>Manajemen Konten</h2>
+                        <p>Buat dan kelola konten untuk ditampilkan di device signage</p>
+                    </div>
+                    <button class="btn btn-primary" id="addContentBtn">
+                        <i class="fas fa-plus"></i> Tambah Konten
+                    </button>
+                </div>
+                <div class="page-body">
+                    <div class="table-wrapper">
+                        <div class="table-toolbar">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Cari konten..." id="contentSearch">
+                            </div>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table>
+                                <thead><tr>
+                                    <th>Judul</th><th>Tipe</th><th>Payload / URL</th>
+                                    <th>Dibuat</th><th>Aksi</th>
+                                </tr></thead>
+                                <tbody id="contentTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="contentEmptyState" class="empty-state" style="display:none;">
+                            <i class="fas fa-photo-video"></i>
+                            <p>Belum ada konten tersedia</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== DEVICE CLIENT PAGE ===== -->
+            <section id="page-clients" class="page-section">
+                <div class="page-header">
+                    <div>
+                        <h2>Device Client Simulator</h2>
+                        <p>Pilih device untuk mensimulasikan tampilan signage</p>
+                    </div>
+                </div>
+                <div class="page-body">
+                    <div class="client-controls">
+                        <label>Pilih Device:</label>
+                        <select id="clientDeviceSelect">
+                            <option value="">-- Pilih Device --</option>
+                        </select>
+                        <button class="btn btn-sm btn-info" id="simConnectBtn">
+                            <i class="fas fa-plug"></i> Simulasi Online
+                        </button>
+                        <button class="btn btn-sm btn-danger" id="simDisconnectBtn">
+                            <i class="fas fa-unlink"></i> Simulasi Offline
+                        </button>
+                    </div>
+                    <div id="clientPreviewArea" class="client-preview">
+                        <div class="client-placeholder">
+                            <i class="fas fa-tv"></i>
+                            <p>Pilih device untuk melihat preview</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== LOGS PAGE ===== -->
+            <section id="page-logs" class="page-section">
+                <div class="page-header">
+                    <div>
+                        <h2>Activity Log</h2>
+                        <p>Riwayat aktivitas real-time seluruh sistem</p>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" id="clearLogsBtn">
+                        <i class="fas fa-trash-alt"></i> Hapus Semua
+                    </button>
+                </div>
+                <div class="page-body">
+                    <div class="log-panel">
+                        <div class="log-header">
+                            <h3>Log Entries</h3>
+                            <span id="logCount" class="log-count"></span>
+                        </div>
+                        <div class="log-entries log-entries-full" id="logEntriesFull"></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- ======================== MODALS ======================== -->
+
+    <!-- Device Modal -->
+    <div class="modal-overlay" id="deviceModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="deviceModalTitle">Tambah Device</h3>
+                <button class="modal-close" data-close="deviceModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editDeviceId">
+                <div class="input-group">
+                    <label for="deviceName">Nama Device</label>
+                    <input type="text" id="deviceName" placeholder="contoh: Lobby Display 1">
+                </div>
+                <div class="input-group">
+                    <label for="deviceLocation">Lokasi</label>
+                    <input type="text" id="deviceLocation" placeholder="contoh: Lantai 1 - Lobby Utama">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="deviceModal">Batal</button>
+                <button class="btn btn-primary" id="saveDeviceBtn">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Modal -->
+    <div class="modal-overlay" id="contentModal">
+        <div class="modal-card modal-card-wide">
+            <div class="modal-header">
+                <h3 id="contentModalTitle">Tambah Konten</h3>
+                <button class="modal-close" data-close="contentModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editContentId">
+                <div class="input-group">
+                    <label for="contentTitle">Judul Konten</label>
+                    <input type="text" id="contentTitle" placeholder="contoh: Promo Akhir Tahun">
+                </div>
+                <div class="input-group">
+                    <label for="contentType">Tipe Konten</label>
+                    <select id="contentType">
+                        <option value="image">Image (Gambar)</option>
+                        <option value="text">Text (Teks)</option>
+                        <option value="video">Video</option>
+                        <option value="url">URL (Website)</option>
+                    </select>
+                </div>
+                <div class="input-group" id="payloadUrlGroup">
+                    <label id="payloadLabel">URL Gambar</label>
+                    <input type="text" id="contentPayload" placeholder="https://picsum.photos/seed/promo/800/600">
+                </div>
+                <div class="input-group" id="payloadTextGroup" style="display:none;">
+                    <label for="contentTextPayload">Isi Teks</label>
+                    <textarea id="contentTextPayload" rows="4" placeholder="Tulis teks yang ingin ditampilkan..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="contentModal">Batal</button>
+                <button class="btn btn-primary" id="saveContentBtn">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Push Content Modal -->
+    <div class="modal-overlay" id="pushModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Push Konten ke Device</h3>
+                <button class="modal-close" data-close="pushModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="pushDeviceId">
+                <p class="push-info">
+                    Pilih konten yang akan di-push ke device:
+                    <strong id="pushDeviceName"></strong>
+                </p>
+                <div id="pushContentList" class="push-content-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="pushModal">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Modal -->
+    <div class="modal-overlay" id="playlistModal">
+        <div class="modal-card modal-card-wide">
+            <div class="modal-header">
+                <h3>Atur Playlist Device</h3>
+                <button class="modal-close" data-close="playlistModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="playlistDeviceSelect">Pilih Device</label>
+                    <select id="playlistDeviceSelect">
+                        <option value="">-- Pilih Device --</option>
+                    </select>
+                </div>
+                <div id="playlistContentArea" style="display:none;">
+                    <label class="playlist-label">Tambahkan konten ke playlist (urutan berpengaruh):</label>
+                    <div id="playlistAvailableContents" class="playlist-available"></div>
+                    <label class="playlist-label" style="margin-top:16px;">Playlist saat ini:</label>
+                    <div id="playlistCurrentItems" class="playlist-current">
+                        <p class="playlist-empty">Playlist kosong</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="playlistModal">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
