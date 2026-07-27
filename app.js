@@ -5,9 +5,8 @@
 // ============================================================
 // KONFIGURASI SUPABASE — GANTI DUA BARIS INI SAJA!
 // ============================================================
-const SUPABASE_URL = 'https://nqgpguckqeneeorfrlqy.supabase.co'; 
-const SUPABASE_ANON_KEY = 'sb_secret_ew72MB-I7rdtJnW70eph8A_Eehm-voz'; 
-
+const SUPABASE_URL = 'https://tizgvonjugxgfhrusxac.supabase.co'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_oFYoO21lLMowA_5R2nn9_A_g9aJ8kPH';
 
 // ============================================================
 // 1. DATABASE LAYER — Supabase REST API
@@ -272,7 +271,7 @@ function handleLogin() {
     localStorage.clear(); // Hapus semua cache lama
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value;
-    // ... seterusnya
+    const errEl = document.getElementById('loginError');
 
     if (user === 'admin' && pass === 'davit2009') {
         const token = simpleJWT({ username: user, role: 'admin' });
@@ -333,6 +332,14 @@ function showToast(type, title, message) {
         setTimeout(() => toast.remove(), 300);
     }, 3500);
 }
+
+// Tangkap semua error async yang tidak ter-handle (mis. fetch ke Supabase gagal)
+// supaya user tidak melihat tombol "diam saja" tanpa keterangan.
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled error:', event.reason);
+    const msg = event.reason?.message || 'Terjadi kesalahan tak terduga';
+    showToast('error', 'Gagal', msg);
+});
 
 
 // ============================================================
