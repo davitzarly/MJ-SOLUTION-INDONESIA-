@@ -849,8 +849,6 @@ wsServer.on('status_change', async () => {
 // ============================================================
 
 function bindEvents() {
-    document.getElementById('loginBtn').addEventListener('click', handleLogin);
-    document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.querySelectorAll('.nav-item[data-page]').forEach(btn => { btn.addEventListener('click', () => navigateTo(btn.dataset.page)); });
     document.getElementById('mobileMenuBtn').addEventListener('click', toggleSidebar);
@@ -927,3 +925,8 @@ async function initApp() {
 }
 
 checkAuth();
+
+// Login button harus bisa diklik SEBELUM user berhasil login,
+// jadi listener-nya didaftarkan langsung di sini, bukan menunggu initApp().
+document.getElementById('loginBtn').addEventListener('click', handleLogin);
+document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
